@@ -419,6 +419,12 @@ h2 {
   pointer-events: none;
 }
 
+.puzzle-frame.is-loading-photo::after {
+  content: "Loading photo...";
+  background: rgba(255, 253, 248, 0.94);
+  color: var(--rose);
+}
+
 .puzzle-frame.is-building::before,
 .puzzle-frame.is-heart::before,
 .puzzle-frame.is-complete::before {
@@ -1148,7 +1154,11 @@ h2 {
   }
 
   .stars-scene {
-    gap: 14px;
+    grid-template-rows: auto auto auto auto;
+    gap: 12px;
+    align-content: start;
+    padding: 18px 14px calc(82px + env(safe-area-inset-bottom));
+    overscroll-behavior: contain;
   }
 
   .stars-header {
@@ -1156,21 +1166,68 @@ h2 {
   }
 
   .stars-header h2 {
-    font-size: 2.5rem;
+    margin-bottom: 6px;
+    font-size: 2.6rem;
+  }
+
+  .stars-header p:not(.eyebrow) {
+    font-size: 0.98rem;
+    line-height: 1.35;
+  }
+
+  .wish-star-field {
+    width: 100%;
+    min-height: clamp(250px, 42vh, 390px);
   }
 
   .wish-box {
-    max-height: 40vh;
+    width: 100%;
+    min-height: 0;
+    max-height: 32vh;
+    padding: 14px 14px 16px;
     overflow-y: auto;
   }
 
+  .wish-count {
+    margin-right: 72px;
+    font-size: 0.72rem;
+  }
+
   .wish-reference {
-    font-size: clamp(1.75rem, 9vw, 2.7rem);
+    font-size: 2.15rem;
+  }
+
+  .wish-text {
+    font-size: 0.92rem;
+    line-height: 1.35;
   }
 
   .floating-reset {
     justify-self: center;
+    min-height: 48px;
+    padding-inline: 20px;
     white-space: nowrap;
+  }
+
+  @media (max-width: 380px) {
+    .stars-header h2 {
+      font-size: 2.25rem;
+    }
+
+    .wish-reference {
+      font-size: 1.9rem;
+    }
+  }
+
+  @media (max-height: 740px) {
+    .stars-scene {
+      gap: 10px;
+      padding-bottom: calc(68px + env(safe-area-inset-bottom));
+    }
+
+    .wish-star-field {
+      min-height: clamp(210px, 34vh, 260px);
+    }
   }
 
   .memory-star {

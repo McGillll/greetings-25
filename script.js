@@ -90,6 +90,7 @@ const wishes = [
     content: "The Lord is with you, rejoices over you, and surrounds you with love.",
   },
 ];
+const puzzlePhotoSrc = "assets/us.jpg";
 const memories = [
   {
     image: "assets/memories/1.jpg",
@@ -181,6 +182,9 @@ let puzzleRevealRun = 0;
 let backgroundAudioStarted = false;
 let activeMemoryIndex = 0;
 let memoriesBuilt = false;
+let puzzlePhotoReady = false;
+let puzzlePhotoFailed = false;
+let puzzlePhotoPromise = null;
 
 if (backgroundAudio) {
   backgroundAudio.volume = 0.35;
@@ -197,6 +201,34 @@ function startBackgroundAudio() {
     .catch(() => {
       backgroundAudioStarted = false;
     });
+}
+
+function preloadPuzzlePhoto() {
+  if (puzzlePhotoPromise) return puzzlePhotoPromise;
+
+  puzzlePhotoPromise = new Promise((resolve) => {
+    const photoProbe = new Image();
+    photoProbe.onload = () => {
+      puzzlePhotoReady = true;
+      puzzlePhotoFailed = false;
+      puzzleFrame.classList.add("has-photo");
+      puzzleFrame.classList.remove("is-loading-photo");
+      const photoRatio = photoProbe.naturalWidth / photoProbe.naturalHeight;
+      scenes.puzzle.style.setProperty("--photo-aspect", `${photoProbe.naturalWidth} / ${photoProbe.naturalHeight}`);
+      scenes.puzzle.style.setProperty("--photo-ratio", photoRatio.toFixed(4));
+      resolve(true);
+    };
+    photoProbe.onerror = () => {
+      puzzlePhotoReady = false;
+      puzzlePhotoFailed = true;
+      puzzleFrame.classList.remove("has-photo", "is-loading-photo");
+      resolve(false);
+    };
+    photoProbe.decoding = "async";
+    photoProbe.src = puzzlePhotoSrc;
+  });
+
+  return puzzlePhotoPromise;
 }
 
 function showScene(name) {
@@ -384,15 +416,7 @@ function buildPuzzle() {
       return Math.hypot(ax - 5, ay - 4.5) - Math.hypot(bx - 5, by - 4.5);
     });
 
-  const photoProbe = new Image();
-  photoProbe.onload = () => {
-    puzzleFrame.classList.add("has-photo");
-    const photoRatio = photoProbe.naturalWidth / photoProbe.naturalHeight;
-    scenes.puzzle.style.setProperty("--photo-aspect", `${photoProbe.naturalWidth} / ${photoProbe.naturalHeight}`);
-    scenes.puzzle.style.setProperty("--photo-ratio", photoRatio.toFixed(4));
-  };
-  photoProbe.onerror = () => puzzleFrame.classList.remove("has-photo");
-  photoProbe.src = "assets/us.jpg";
+  preloadPuzzlePhoto();
 
   for (let row = 0; row < rows; row += 1) {
     for (let col = 0; col < columns; col += 1) {
@@ -424,6 +448,19 @@ function isHeartPiece(col, row, columns, rows) {
 
 function revealPuzzle() {
   if (puzzleAnimating || puzzleStage === "complete") return;
+
+  if (!puzzlePhotoReady && !puzzlePhotoFailed) {
+    puzzleAnimating = true;
+    puzzleFrame.classList.add("is-loading-photo");
+    puzzleFrame.setAttribute("aria-label", "Loading the photo");
+    preloadPuzzlePhoto().then(() => {
+      puzzleAnimating = false;
+      if (puzzleStage === "hidden") {
+        revealPuzzle();
+      }
+    });
+    return;
+  }
 
   if (puzzleStage === "heart") {
     completePuzzle();
@@ -513,7 +550,7 @@ function resetPuzzle() {
   puzzleStage = "hidden";
   puzzleAnimating = false;
   puzzleRevealRun += 1;
-  puzzleFrame.classList.remove("is-building", "is-heart", "is-complete");
+  puzzleFrame.classList.remove("is-building", "is-heart", "is-complete", "is-loading-photo");
   puzzleFrame.setAttribute("aria-label", "Reveal the photo heart");
   memoryCaption?.classList.remove("is-visible");
   puzzleFrame.querySelectorAll(".memory-spark").forEach((spark) => spark.remove());
@@ -811,3 +848,4 @@ window.addEventListener("keydown", (event) => {
 });
 
 buildPuzzle();
+preloadPuzzlePhoto();
