@@ -713,6 +713,25 @@ function buildMemoryConstellation() {
 
   memoryConstellation.innerHTML = "";
 
+  Array.from({ length: 120 }).forEach((_, index) => {
+    const galaxyStar = document.createElement("span");
+    const bandBias = Math.random();
+    const x = Math.random() * 100;
+    const y = bandBias < 0.55
+      ? 18 + Math.random() * 64
+      : Math.random() * 100;
+    const size = Math.random() < 0.16 ? 2.2 + Math.random() * 1.4 : 0.8 + Math.random() * 1.6;
+
+    galaxyStar.className = "galaxy-dot";
+    galaxyStar.style.setProperty("--galaxy-x", `${x}%`);
+    galaxyStar.style.setProperty("--galaxy-y", `${y}%`);
+    galaxyStar.style.setProperty("--galaxy-size", `${size}px`);
+    galaxyStar.style.setProperty("--galaxy-alpha", `${0.18 + Math.random() * 0.66}`);
+    galaxyStar.style.setProperty("--galaxy-blur", `${Math.random() < 0.22 ? 4 + Math.random() * 8 : 0}px`);
+    galaxyStar.style.setProperty("--galaxy-delay", `${Math.random() * 3200}ms`);
+    memoryConstellation.appendChild(galaxyStar);
+  });
+
   memories.slice(0, -1).forEach((memory, index) => {
     const nextMemory = memories[index + 1];
     const deltaX = nextMemory.x - memory.x;
