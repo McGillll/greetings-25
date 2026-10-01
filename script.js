@@ -90,7 +90,7 @@ const wishes = [
     content: "The Lord is with you, rejoices over you, and surrounds you with love.",
   },
 ];
-const puzzlePhotoSrc = "assets/us.jpg";
+const puzzlePhotoSrc = "https://pub-b7169f7857ac4d578aa9207bd9ced69e.r2.dev/greetings-25/us.jpg";
 const memories = [
   {
     image: "assets/memories/1.jpg",
@@ -205,6 +205,8 @@ function startBackgroundAudio() {
 
 function preloadPuzzlePhoto() {
   if (puzzlePhotoPromise) return puzzlePhotoPromise;
+
+  puzzleFrame.style.setProperty("--photo-url", `url("${puzzlePhotoSrc}")`);
 
   puzzlePhotoPromise = new Promise((resolve) => {
     const photoProbe = new Image();
